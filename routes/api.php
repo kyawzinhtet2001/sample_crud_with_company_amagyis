@@ -19,10 +19,19 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::name('student-')->prefix('student/')->group(function(){
+Route::name('student-')->prefix('student/')->middleware(['middleware'=>LanguageMiddleware::class])->group(function(){
     Route::get('/','Api\StudentController@index');
     Route::post('/','Api\StudentController@store');
     Route::put('/{id}','Api\StudentController@update')->where('id',"\d+");
     Route::delete('/{id}','Api\StudentController@destroy')->where('id',"\d+");
     Route::get('/{id}','Api\StudentController@detail')->where('id',"\d+");
+});
+
+
+Route::name('teacher-')->prefix('teacher/')->middleware(['middleware'=>LanguageMiddleware::class])->group(function(){
+    Route::get('/','Api\TeachersController@index');
+    Route::post('/','Api\TeachersController@store');
+    Route::put('/{id}','Api\TeachersController@update')->where('id',"\d+");
+    Route::delete('/{id}','Api\TeachersController@destroy')->where('id',"\d+");
+    Route::get('/{id}','Api\TeachersController@detail')->where('id',"\d+");
 });

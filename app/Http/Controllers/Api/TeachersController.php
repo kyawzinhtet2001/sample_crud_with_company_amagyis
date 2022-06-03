@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\DB;
 use TheSeer\Tokenizer\Exception;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Teacher;
+use App\Http\Requests\TeacherRequest;
 /**
  * Student crud controller.
  * @author kyaw zin htet
  * @create 6/1/2022
  */
-class StudentController extends Controller
+class TeachersController extends Controller
 {
     /**
      * List all or find something.
@@ -24,48 +26,48 @@ class StudentController extends Controller
      */
     public function index()
     {
-        try{
-        $search = request()->get("search");
-        $type = request()->get("type");
-        if ($search != null) {
-            if (!empty($type)) {
-                if ($type == 1) {
-                    $students = DB::table('students')->where("id", $search)->paginate(10);
-                }
-                elseif ($type == 2) {
-                    $students = DB::table('students')->where("name", "like", $search . "%")->paginate(10);
-                }
-                elseif ($type == 3) {
-                    $students = DB::table('students')->where("email", "like", $search . "%")->paginate(10);
-                }
-                elseif ($type == 4) {
-                    $students = DB::table('students')->where("career_path", $search)->paginate(10);
-                }
+        try {
+            $search = request()->get("search");
+            $type = request()->get("type");
+            if ($search != null) {
+                if (!empty($type)) {
+                    if ($type == 1) {
+                        $students = Teacher::where("teacher_id", $search)->paginate(10);
+                    }
+                    elseif ($type == 2) {
+                        $students = Teacher::where("name", "like", $search . "%")->paginate(10);
+                    }
+                    elseif ($type == 3) {
+                        $students = Teacher::where("email", "like", $search . "%")->paginate(10);
+                    }
+                    elseif ($type == 4) {
+                        $students = Teacher::where("career_path", $search)->paginate(10);
+                    }
 
+                }
+                else {
+                    try {
+                        (int)$search;
+                        $students = Teacher::where("teacher_id", "like", "%" . $search . "%")->orWhere("career_path", $search)->paginate(10);
+                    // $students = DB::table('students')->where("id", $search)->orWhere("career_path", $search)->paginate(10);
+                    }
+                    catch (Exception $ex) {
+                        $students = Teacher::where("email", "like", "%" . $search . "%")->orWhere("name", "like", "%" . $search . "%")->paginate(10);
+                    }
+                }
+            // dd($students);
             }
             else {
-                try {
-                    (int)$search;
-                    $students = DB::table('students')->where("student_id","like","%".$search."%")->orWhere("career_path", $search)->paginate(10);
-                // $students = DB::table('students')->where("id", $search)->orWhere("career_path", $search)->paginate(10);
-                }
-                catch (Exception $ex) {
-                    $students = DB::table('students')->where("email", "like", "%".$search . "%")->orWhere("name", "like", "%" .$search . "%")->paginate(10);
-                }
+                $students = Teacher::paginate(10);
             }
-            // dd($students);
+            if ($students->isEmpty()) {
+                throw new Exception();
+            }
+            return response()->json(["status" => "OK", "data" => $students]);
         }
-        else {
-            $students = DB::table("students")->paginate(10);
+        catch (Exception $e) {
+            return response()->json(["status" => "NG", "message" => "No Data Found"]);
         }
-        if($students->isEmpty()){
-            throw new Exception();
-        }
-        return response()->json(["status" => "OK", "data" => $students]);
-    }catch(Exception $e){
-        return response()->json(["status" => "NG", "message" => "No Data Found"]);
-
-    }
     }
     /**
      * List detail
@@ -75,38 +77,37 @@ class StudentController extends Controller
      */
     public function detail(int $id)
     {
-        $students = DB::table('students')->leftJoin("student_skills", "student_skills.student_id", "=", "students.student_id")->where('students.id', $id)->select("students.*", "student_skills.*", "students.id as id")->get();
-        $arr = [];
-        foreach ($students as $student) {
-            array_push($arr, $student->skill_id);
-        }
-        // dd($students->get(0));
-        $students->get(0)->skills = $arr;
-        if ($students->isNotEmpty()) {
-            return response()->json(["status" => "OK", "data" => $students->first()]);
+
+        $student = Teacher::where("id", $id)->with(["skills"=>function($query){
+            $query->select("skills.name");
+        }])->first();
+
+        if ($student) {
+            return response()->json(["status" => "OK", "data" => $student]);
         }
         return response()->json(["status" => "NG", "message" => "No Data Found"]);
 
     }
     /**
      * Store a student to database
-     * @param StudentRequest $request
+     * @param TeacherRequest $request
      * @author kyaw zin htet
      * @create 6/1/2022
      */
-    public function store(StudentRequest $request)
+    public function store(TeacherRequest $request)
     {
         try {
-            $student_id = max(DB::table('students')->max('student_id'), 10000);
-            $student_id++;
+            $teacher_id = max(DB::table('teachers')->max('teacher_id'), 10000);
+            $teacher_id++;
             $data = $request->validated();
 
             $data['created_emp'] = $data['emp_id'];
             $data['updated_emp'] = $data['emp_id'];
             unset($data['emp_id']);
-            $data['student_id'] = $student_id;
+            $data['teacher_id'] = $teacher_id;
             $skills = null;
             if (isset($data['avatar'])) {
+                /** @var \Illuminate\Http\UploadedFile */
                 $avater = $data['avatar'];
                 $avater->storeAs('/public', $avater->getClientOriginalName());
                 $data['avatar'] = $avater->getClientOriginalName();
@@ -119,29 +120,28 @@ class StudentController extends Controller
 
             unset($data['skills']);
 
-            $result = DB::transaction(function () use ($data, $skills, $student_id) {
-                DB::table("students")->insert([
+            $result = DB::transaction(function () use ($data, $skills, $teacher_id) {
+                Teacher::insert([
                     $data
                 ]);
                 $arr = [];
                 if (!empty($skills)) {
                     foreach ($skills as $i) {
                         array_push($arr, [
-                            "student_id" => $student_id,
+                            "teacher_id" => $teacher_id,
                             "skill_id" => $i,
-                            "created_emp" => $data['created_emp'],
-                            "updated_emp" => $data["updated_emp"]
+
                         ]);
                     }
                 }
-                DB::table("student_skills")->insert($arr);
+                DB::table("teacher_skill")->insert($arr);
 
                 $result = true;
                 return $result;
             });
 
             if ($result) {
-                return response()->json(['status' => "OK", "message" => "Created Student"]);
+                return response()->json(['status' => "OK", "message" => "Created Teacher"]);
             }
             throw new Exception();
         }
@@ -152,11 +152,11 @@ class StudentController extends Controller
     /**
      * Update Student.
      * @param int $id
-     * @param StudentRequest $request
+     * @param  TeacherRequest $request
      * @author kyaw zin htet
      * @create 6/1/2022
      */
-    public function update(int $id, StudentRequest $request)
+    public function update(int $id, TeacherRequest $request)
     {
         try {
             $data = $request->validated();
@@ -165,10 +165,8 @@ class StudentController extends Controller
                 $skills = $data['skills'];
                 unset($data['skills']);
             }
-            $data['updated_emp'] = $data['emp_id'];
-            unset($data['emp_id']);
-            $old = DB::table('students')->where('id', $id)->first();
-            if(!$old){
+            $old = Teacher::where('id', $id)->first();
+            if (!$old) {
                 throw new Exception();
             }
             if (isset($data['avatar'])) {
@@ -180,29 +178,28 @@ class StudentController extends Controller
                 $data['avatar'] = $data['avatar']->getClientOriginalName();
 
             }
+
+            $data['updated_emp'] = $data['emp_id'];
+            unset($data['emp_id']);
             $result = DB::transaction(function () use ($id, $data, $old, $skills) {
-                DB::table('students')->where('id', $id)->update($data);
-                DB::table('student_skills')->where('student_id', $old->student_id)->delete();
+                Teacher::where('id', $id)->update($data);
+                DB::table('teacher_skill')->where('teacher_id', $old->teacher_id)->delete();
                 $arr = [];
                 if (!empty($skills)) {
                     foreach ($skills as $i) {
 
                         array_push($arr, [
-                            "student_id" => $old->student_id,
+                            "teacher_id" => $old->teacher_id,
                             "skill_id" => $i,
-                            "created_emp" => $data['created_emp'],
-                            "updated_emp" => $data["updated_emp"]
                         ]);
 
                     }
-                    DB::table('student_skills')->insert($arr);
+                    DB::table('teacher_skill')->insert($arr);
                 }
-
-
                 return true;
             });
             if ($result) {
-                return response()->json(['status' => "OK", "message" => "Updated Student"]);
+                return response()->json(['status' => "OK", "message" => "Updated Teacher check to list to view more"]);
             }
             throw new Exception("Not Found");
         }
@@ -222,23 +219,22 @@ class StudentController extends Controller
     {
         DB::beginTransaction();
         try {
-            $s = DB::table('students')->where('id', $id)->first();
+            $s = Teacher::where('id', $id)->first();
             if (!$s) {
                 throw new Exception("Nothing Found");
             }
 
+            $s->delete();
+            DB::commit();
             if (is_file(storage_path('app/public/') . $s->avatar))
                 Storage::delete('public/' . $s->avatar);
-            $s = DB::table('students')->delete($id);
-            DB::commit();
-            return response()->json(["status" => "OK", "message" => "Student is Deleted"]);
+            // Teacher::destroy($id);
+            return response()->json(["status" => "OK", "message" => "Teacher is Deleted"]);
         }
         catch (Exception $exception) {
             DB::rollBack();
             Log::debug($exception->getMessage());
             return response()->json(["status" => "NG", 'message' => "Already deleted or pls check logs"]);
-        } // dd()
-    // dd(is_file(storage_path('app/public/') . $s->avatar));
-    // dd(Storage::delete('public/' . $s->avatar));
+        }
     }
 }

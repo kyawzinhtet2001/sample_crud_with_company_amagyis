@@ -29,7 +29,7 @@ class CreateTeachersTable extends Migration
             $table->tinyInteger('career_path',false,true)->nullable()->default(1);//1:Fornt End,2:Back End
             $table->integer('created_emp');
             $table->integer('updated_emp');
-            $table->softDeletes();
+
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
         });

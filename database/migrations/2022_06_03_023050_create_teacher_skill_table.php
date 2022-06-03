@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTeacherSkillsTable extends Migration
+class CreateTeacherSkillTable extends Migration
 {
     /**
      * Run the migrations.
@@ -19,7 +19,7 @@ class CreateTeacherSkillsTable extends Migration
             $table->unsignedBigInteger('skill_id');
             $table->foreign("teacher_id")->references("teacher_id")->on("teachers")->onDelete('cascade');
             $table->foreign("skill_id")->references("id")->on("skills")->onDelete('cascade');
-            $table->softDeletes();
+
             $table->timestamp('updated_at')->useCurrent();
             $table->timestamp('created_at')->useCurrent();
         });

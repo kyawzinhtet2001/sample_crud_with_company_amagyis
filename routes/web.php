@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\LanguageMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +15,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+
+
     return view('welcome');
+})->middleware(LanguageMiddleware::class);
+
+
+Route::group(['middleware'=>LanguageMiddleware::class],function(){
+
 });
