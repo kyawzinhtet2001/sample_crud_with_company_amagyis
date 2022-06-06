@@ -13,8 +13,30 @@ class StudentExport implements FromCollection,WithHeadings
     */
     public function collection()
     {
-        return Student::all();
+        $s=Student::with("skills")->get();
+        // dd($s);
+        $i=0;
+        foreach($s as $r){
+                $j=0;
+                $name='';
+            foreach($r["skills"] as $skill){
+                $name.=$skill['name'].",";
+                if($j==sizeof($skill)-2){
+                    $name.=$skill['name'];
+                }
+                if($j!=0){
+                    unset($s[$i]["skills"][$j]);
+                }
+                $j++;
+            }
+            $s[$i]["skills"]=$name;
+            $i++;
+        }
+        //  dd($s);
+        return $s;
     }
+
+
     public function headings():array{
         return [
             "id",
@@ -33,7 +55,8 @@ class StudentExport implements FromCollection,WithHeadings
             "updated_emp",
             "deleted_at",
             "created_at",
-            "updated_at"
+            "updated_at",
+            "student.skills"
         ];
     }
 }

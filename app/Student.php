@@ -10,4 +10,7 @@ class Student extends Model
     Use SoftDeletes;
     protected $table="students";
     protected $guarded=[];
+    public function skills(){
+        return $this->belongsToMany(Skill::class,"student_skills","student_id","skill_id","student_id");
+    }
 }

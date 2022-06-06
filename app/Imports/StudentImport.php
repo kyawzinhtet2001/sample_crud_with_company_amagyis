@@ -5,36 +5,42 @@ namespace App\Imports;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 // use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+
 use App\Student;
 
-class StudentImport implements ToCollection
+class StudentImport implements ToCollection,WithHeadingRow
 {
     /**
     * @param Collection $collection
     */
     public function collection(Collection $collection)
     {
+        // dd($collection);
         foreach($collection as $row){
             Student::create(
                 [
-                    "student_id"=> $row[1],
-                    "name"=> $row[2],
-                    "father_name"=> $row[3],
-                    "nrc_number"=> $row[4],
-                    "phone_no"=> $row[5],
-                    "email"=>$row[6],
-                    "gender"=>$row[7],
-                    "date_of_birth"=>$row[8],
-                    "avatar"=>$row[9],
-                    "address"=>$row[10],
-                    "career_path"=>$row[11],
-                    "created_emp"=>$row[12],
-                    "updated_emp"=>$row[13],
-                    "deleted_at"=>$row[14],
-                    "created_at"=>$row[15],
-                    "updated_at"=>$row[16]
+                    "student_id"=> $row["student_id"],
+                    "name"=> $row["name"],
+                    "father_name"=> $row["father_name"],
+                    "nrc_number"=> $row["nrc_number"],
+                    "phone_no"=> $row["phone_number"],
+                    "email"=>$row["email"],
+                    "gender"=>$row["gender"],
+                    "date_of_birth"=>$row["date_of_birth"],
+                    "avatar"=>$row["avatar"],
+                    "address"=>$row["address"],
+                    "career_path"=>$row["career_path"],
+                    "created_emp"=>$row["created_emp"],
+                    "updated_emp"=>$row["updated_emp"],
+                    "created_at"=>now(),
+                    "updated_at"=>now()
                 ]
             );
         }
+    }
+    public function headingRow(): int
+    {
+        return 1;
     }
 }

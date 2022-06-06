@@ -14,6 +14,8 @@ use App\Interfaces\StudentRespositoryInterface;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentExport;
 use App\Imports\StudentImport;
+use App\Student;
+
 /**
  * Student crud controller.
  * @author kyaw zin htet
@@ -252,9 +254,11 @@ class StudentController extends Controller
     }
 
     public function excelDownload(){
-        return Excel::download(new StudentExport(),time().'student.xlsx');
+        // dd(Student::with("skills")->get());
+        return Excel::download(new StudentExport,time().'student.xlsx');
     }
     public function excelUpload(){
-        return Excel::import(new StudentImport(),request()->file("avater"));
+        Excel::import(new StudentImport(),request()->file("avater"));
+        return response()->json(["status"=>"OK","message"=>"successfully imported"]);
     }
 }
