@@ -9,18 +9,28 @@ use \Exception;
 use App\Http\Requests\ClassroomRequest;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
+use Illuminate\Database\QueryException;
+/**
+ * This is class Controller class work
+ * @author kyaw zin htet
+ * @created_at 6/6/2022
+ */
 class ClassroomController extends Controller
 {
-    private ClassroomRepositoryInterface $classroomRepository;
+    private ClassroomRepositoryInterface $classroom;
 
     public function __construct(ClassroomRepositoryInterface $classroom){
         $this->classroomRepository=$classroom;
     }
     public function index(){
         try{
-            return response()->json(["status"=>"OK","data"=>$this->classroomRepository->getAll()]);
-        }catch(Exception $e){
+            return response()->json(["status"=>"OK","data"=>$this->classroomRepository->getAll()],200);
+        }
+        catch(QueryException $e){
+            return response()->json(["status"=>"NG","message"=>"Database Exception"]);
+
+        }
+        catch(Exception $e){
             return response()->json(["status"=>"NG","message"=>"No Data Found"]);
         }
     }
@@ -28,8 +38,9 @@ class ClassroomController extends Controller
         try{
             $validated_data=$request->validated();
             $this->classroomRepository->insert($validated_data);
-            return response()->json(["status"=>"OK","message"=>"Class is inserted"],201);
+            return response()->json(["status"=>"OK","message"=>"Class is inserted"],200);
         }catch(Exception $e){
+
             return response()->json(["status"=>"NG","message"=>"No Data Found"]);
         }
     }

@@ -11,6 +11,9 @@ use TheSeer\Tokenizer\Exception;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Interfaces\StudentRespositoryInterface;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\StudentExport;
+use App\Imports\StudentImport;
 /**
  * Student crud controller.
  * @author kyaw zin htet
@@ -246,5 +249,12 @@ class StudentController extends Controller
         } // dd()
     // dd(is_file(storage_path('app/public/') . $s->avatar));
     // dd(Storage::delete('public/' . $s->avatar));
+    }
+
+    public function excelDownload(){
+        return Excel::download(new StudentExport(),time().'student.xlsx');
+    }
+    public function excelUpload(){
+        return Excel::import(new StudentImport(),request()->file("avater"));
     }
 }

@@ -26,6 +26,8 @@ Route::name('student-')->prefix('student/')->middleware(['middleware'=>LanguageM
     Route::put('/{id}','Api\StudentController@update')->where('id',"\d+");
     Route::delete('/{id}','Api\StudentController@destroy')->where('id',"\d+");
     Route::get('/{id}','Api\StudentController@detail')->where('id',"\d+");
+    Route::get('excel/download','Api\StudentController@excelDownload');
+    Route::post('excel/upload','Api\StudentController@excelUpload');
 });
 
 

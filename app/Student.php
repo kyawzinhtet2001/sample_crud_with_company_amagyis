@@ -9,4 +9,5 @@ class Student extends Model
 {
     Use SoftDeletes;
     protected $table="students";
+    protected $guarded=[];
 }

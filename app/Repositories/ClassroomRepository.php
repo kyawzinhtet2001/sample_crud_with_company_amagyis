@@ -6,7 +6,7 @@ use App\Interfaces\ClassroomRepositoryInterface;
 use App\Model\Classroom;
 
 /**
- * This is ClassroomRepositoryInterface
+ * This is ClassroomRepository
  * @author kyaw zin htet
  * @created_at 6/6/2022
  *
