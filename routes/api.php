@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\LanguageMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,4 +35,11 @@ Route::name('teacher-')->prefix('teacher/')->middleware(['middleware'=>LanguageM
     Route::put('/{id}','Api\TeachersController@update')->where('id',"\d+");
     Route::delete('/{id}','Api\TeachersController@destroy')->where('id',"\d+");
     Route::get('/{id}','Api\TeachersController@detail')->where('id',"\d+");
+});
+Route::name('teacher-')->prefix('classroom/')->middleware(['middleware'=>LanguageMiddleware::class])->group(function(){
+    Route::get('/','Api\ClassroomController@index');
+    Route::post('/','Api\ClassroomController@store');
+    Route::put('/{id}','Api\ClassroomController@update')->where('id',"\d+");
+    Route::delete('/{id}','Api\ClassroomController@destroy')->where('id',"\d+");
+    Route::get('/{id}','Api\ClassroomController@detail')->where('id',"\d+");
 });

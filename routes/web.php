@@ -18,8 +18,7 @@ Route::get('/', function () {
 
 
     return view('welcome');
-})->middleware(LanguageMiddleware::class);
-
+});
 
 Route::group(['middleware'=>LanguageMiddleware::class],function(){
 

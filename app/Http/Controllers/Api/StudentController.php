@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use TheSeer\Tokenizer\Exception;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Interfaces\StudentRespositoryInterface;
 /**
  * Student crud controller.
  * @author kyaw zin htet
@@ -17,6 +18,11 @@ use Illuminate\Support\Facades\Storage;
  */
 class StudentController extends Controller
 {
+    /** @var \App\Interfaces\StudentRespositoryInterface $repository */
+    private StudentRespositoryInterface $repository;
+    public function __consturct(StudentRespositoryInterface $student){
+        $this->repository=$student;
+    }
     /**
      * List all or find something.
      * @author kyaw zin htet
