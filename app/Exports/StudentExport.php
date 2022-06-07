@@ -20,9 +20,10 @@ class StudentExport implements FromCollection,WithHeadings
                 $j=0;
                 $name='';
             foreach($r["skills"] as $skill){
-                $name.=$skill['name'].",";
-                if($j==sizeof($skill)-2){
+                if($j==sizeof($r["skills"])-1){
                     $name.=$skill['name'];
+                }else{
+                    $name.=$skill['name'].",";
                 }
                 if($j!=0){
                     unset($s[$i]["skills"][$j]);
