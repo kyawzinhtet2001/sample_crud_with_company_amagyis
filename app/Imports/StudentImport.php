@@ -26,7 +26,7 @@ class StudentImport implements ToCollection,WithHeadingRow
                     "nrc_number"=> $row["nrc_number"],
                     "phone_no"=> $row["phone_number"],
                     "email"=>$row["email"],
-                    "gender"=>$row["gender"],
+                    "gender"=>$row["gender"]==='male'? "male":'female',
                     "date_of_birth"=>$row["date_of_birth"],
                     "avatar"=>$row["avatar"],
                     "address"=>$row["address"],

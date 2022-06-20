@@ -41,16 +41,16 @@ class StudentController extends Controller
         if ($search != null) {
             if (!empty($type)) {
                 if ($type == 1) {
-                    $students = DB::table('students')->where("id", $search)->paginate(10);
+                    $students = DB::table('students')->where("id", $search)->where("deleted_at",null)->paginate(10);
                 }
                 elseif ($type == 2) {
-                    $students = DB::table('students')->where("name", "like", $search . "%")->paginate(10);
+                    $students = DB::table('students')->where("name", "like", $search . "%")->where("deleted_at",null)->paginate(10);
                 }
                 elseif ($type == 3) {
-                    $students = DB::table('students')->where("email", "like", $search . "%")->paginate(10);
+                    $students = DB::table('students')->where("email", "like", $search . "%")->where("deleted_at",null)->paginate(10);
                 }
                 elseif ($type == 4) {
-                    $students = DB::table('students')->where("career_path", $search)->paginate(10);
+                    $students = DB::table('students')->where("career_path", $search)->where("deleted_at",null)->paginate(10);
                 }
 
             }

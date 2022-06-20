@@ -17,6 +17,7 @@ class CreateClassTable extends Migration
             $table->id();
             $table->string("name");
             $table->integer("limit");
+            $table->softDeletes();
             $table->timestamps();
         });
     }
